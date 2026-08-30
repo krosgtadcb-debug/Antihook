@@ -14,6 +14,7 @@ public sealed class MainForm : Form
     private readonly Panel content = new() { Dock = DockStyle.Fill, Padding = new Padding(28) };
     private readonly Label status = new() { AutoSize = true, ForeColor = Color.LightGray, Dock = DockStyle.Bottom, Padding = new Padding(12) };
     private readonly ClientSecurity security = new();
+    private readonly WebSocketGateway gateway = new();
 
     public MainForm()
     {
@@ -53,7 +54,25 @@ public sealed class MainForm : Form
         AddLabel(box, "ACCESO SEGURO", 0, 0, 22, accent);
         AddLabel(box, "Inicia sesión para continuar", 0, 40, 10, Color.LightGray);
         var user = Input(box, "Usuario", 0, 82); var pass = Input(box, "Contraseña", 0, 142); pass.UseSystemPasswordChar = true;
-        var login = ActionButton("INICIAR SESIÓN", 0, 210, 350); login.Click += async (_, _) => { status.Text = "Validando sesión…"; await Task.Delay(350); ShowGames(user.Text); };
+        var login = ActionButton("INICIAR SESIÓN", 0, 210, 350);
+        login.Click += async (_, _) =>
+        {
+            if (string.IsNullOrWhiteSpace(user.Text) || string.IsNullOrWhiteSpace(pass.Text))
+            {
+                MessageBox.Show("Datos incorrectos", "Antihook", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            login.Enabled = false; status.Text = "Validando sesión…";
+            try
+            {
+                var response = await gateway.LoginAsync(user.Text.Trim(), pass.Text, security.GetHwid());
+                if (response.Success) ShowGames(user.Text.Trim());
+                else MessageBox.Show("Datos incorrectos", "Antihook", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            catch (WebSocketException) { MessageBox.Show("No se pudo conectar con el servidor de autenticación.", "Antihook", MessageBoxButtons.OK, MessageBoxIcon.Error); }
+            catch (Exception) { MessageBox.Show("Datos incorrectos", "Antihook", MessageBoxButtons.OK, MessageBoxIcon.Warning); }
+            finally { login.Enabled = true; status.Text = ""; }
+        };
         var register = ActionButton("REGISTRAR CUENTA", 0, 260, 350); register.BackColor = Color.FromArgb(45, 52, 65); register.Click += (_, _) => MessageBox.Show("Registro preparado para conectarse al servidor WebSocket.", "Antihook");
         box.Controls.Add(login); box.Controls.Add(register);
     }
@@ -96,6 +115,7 @@ public sealed class MainForm : Form
     private static void AddLabel(Control parent, string text, int x, int y, int size, Color color) => parent.Controls.Add(new Label { Text = text, Location = new Point(x, y), AutoSize = true, ForeColor = color, Font = new Font("Segoe UI", size, FontStyle.Regular) });
     private static TextBox Input(Control parent, string placeholder, int x, int y) { AddLabel(parent, placeholder, x, y, 9, Color.LightGray); var box = new TextBox { Location = new Point(x, y + 20), Width = 350, BackColor = Color.FromArgb(35, 42, 55), ForeColor = Color.White, BorderStyle = BorderStyle.FixedSingle }; parent.Controls.Add(box); return box; }
     private Button ActionButton(string text, int x, int y, int width) => new() { Text = text, Location = new Point(x, y), Width = width, Height = 34, BackColor = accent, ForeColor = Color.FromArgb(15, 20, 28), FlatStyle = FlatStyle.Flat, FlatAppearance = { BorderSize = 0 }, Font = new Font("Segoe UI", 9, FontStyle.Bold) };
+    protected override async void Dispose(bool disposing) { if (disposing) await gateway.DisposeAsync(); base.Dispose(disposing); }
 }
 
 internal static class NativeWindow

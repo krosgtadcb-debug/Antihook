@@ -37,7 +37,8 @@ public static class Program
                 if (type == "login")
                 {
                     var request = JsonSerializer.Deserialize<LoginRequest>(doc.RootElement.GetProperty("payload").GetRawText());
-                    var response = request is null || database.IsBanned(request.Hwid) ? new LoginResponse(false, "Acceso denegado") : new LoginResponse(true, "Autenticación correcta", Guid.NewGuid().ToString("N"));
+                    var valid = request is not null && database.ValidateUser(request.Username, request.Password, request.Hwid);
+                    var response = valid ? new LoginResponse(true, "Autenticación correcta", Guid.NewGuid().ToString("N")) : new LoginResponse(false, "Datos incorrectos");
                     database.Log($"Autenticación {(response.Success ? "exitosa" : "rechazada")}"); await Send(socket, response);
                 }
                 else if (type == "servers") await Send(socket, new List<ServerInfo> { new("Official Europe", "Procedural Map", 42, 100, 38), new("Community #01", "Hapis Island", 68, 128, 54) });

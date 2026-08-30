@@ -92,3 +92,16 @@ La interfaz y el esqueleto de backend están implementados. El registro real de 
 ## Autor
 
 OxyMonster
+
+## Flujo de login
+
+El cliente ahora envía usuario, contraseña y HWID al servidor WebSocket. Si el servidor valida la sesión, se abre el dashboard principal; si la validación falla, el cliente muestra **“Datos incorrectos”** y permanece en la pantalla de acceso.
+
+Para probar el flujo incluido:
+
+| Usuario | Contraseña | Resultado |
+|---|---|---|
+| `admin` | `admin123` | Abre el dashboard. |
+| Cualquier otro valor | Cualquier otra contraseña | Muestra “Datos incorrectos”. |
+
+Estas credenciales son únicamente de demostración y deben reemplazarse por usuarios persistidos con contraseñas derivadas mediante un algoritmo resistente antes de cualquier uso real.

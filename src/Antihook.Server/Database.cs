@@ -30,4 +30,12 @@ public sealed class Database
         using var connection = new SqliteConnection(connectionString); connection.Open(); using var cmd = connection.CreateCommand();
         cmd.CommandText = "SELECT COUNT(*) FROM bans WHERE hwid = $hwid"; cmd.Parameters.AddWithValue("$hwid", hwid); return Convert.ToInt32(cmd.ExecuteScalar()) > 0;
     }
+
+    public bool ValidateUser(string username, string password, string hwid)
+    {
+        if (IsBanned(hwid)) return false;
+        // Credencial de demostración para probar el flujo completo: admin / admin123.
+        // Sustituir por usuarios persistidos y hash Argon2id/PBKDF2 antes de producción.
+        return username.Equals("admin", StringComparison.OrdinalIgnoreCase) && password == "admin123";
+    }
 }
