@@ -50,3 +50,45 @@ El texto original recibido se conserva sin modificaciones en [`pasted_content.tx
 ## Licencia
 
 Pendiente de definir por el propietario del proyecto.
+
+## Implementación C#
+
+La solución `Antihook.sln` contiene tres proyectos:
+
+| Proyecto | Propósito |
+|---|---|
+| `Antihook.Client` | Dashboard Windows Forms sin bordes, autenticación inicial, tarjetas de juegos y vista de servidores. |
+| `Antihook.Server` | Servidor WebSocket en `localhost:5050`, autenticación JSON, servidores de demostración y SQLite. |
+| `Antihook.Shared` | Contratos JSON compartidos entre cliente y servidor. |
+
+### Ejecución
+
+Se requiere **.NET 8 SDK** y, para el cliente, Windows con soporte de Windows Forms.
+
+```bash
+dotnet restore Antihook.sln
+dotnet build Antihook.sln
+dotnet run --project src/Antihook.Server/Antihook.Server.csproj
+```
+
+En otra terminal de Windows:
+
+```powershell
+dotnet run --project src/Antihook.Client/Antihook.Client.csproj
+```
+
+El cliente incluye datos de servidores de demostración para que la interfaz sea navegable antes de conectar el backend.
+
+### Seguridad y privacidad
+
+La identificación local usa un hash SHA-256 de datos no privilegiados del entorno como demostración. No se presenta como una identidad de hardware inalterable. En producción se debe solicitar consentimiento, minimizar la recolección, proteger credenciales con un algoritmo de derivación de claves y definir retención de datos.
+
+El módulo anticheat del cliente es deliberadamente un adaptador seguro: no carga drivers, no altera memoria y no incluye técnicas de evasión, inyección, bloqueo de depuradores ni explotación de drivers vulnerables. Un driver real requiere firma, revisión independiente, pruebas aisladas, política de actualización y un modelo de amenazas formal.
+
+### Estado de implementación
+
+La interfaz y el esqueleto de backend están implementados. El registro real de usuarios, la administración autenticada, la conexión efectiva del cliente al WebSocket y la integración con servicios de juegos quedan como siguientes iteraciones.
+
+## Autor
+
+OxyMonster
