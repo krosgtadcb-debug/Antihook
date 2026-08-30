@@ -1,0 +1,22 @@
+Diseño y Experiencia de Usuario (Dashboard Estilo Steam)
+​Interfaz Visual: Ventana sin bordes clásicos de Windows, estilizada con una barra superior personalizada (minimizar, cerrar) y una paleta de colores corporativa oscura inspirada en Steam (fondos #1b2838, paneles #171a21 y acentos azulados #66c0f4).
+​Pantalla de Juegos: El menú principal muestra tres grandes portadas o tarjetas interactivas correspondientes a Rust, Battlefield 3 y Battlefield 4.
+​Vista de Servidores: Al hacer clic en cualquiera de los tres juegos, la interfaz realiza una transición fluida hacia una lista detallada de servidores disponibles para ese título específico (mostrando nombre del servidor, mapa, jugadores en línea y latencia/ping), permitiendo unirse con un solo clic previa validación de seguridad.
+​Arquitectura del Cliente (Windows Forms en C#)
+​Sistema de Autenticación: Pantalla inicial con diseño limpio para el Registro y Inicio de Sesión, conectada de forma asíncrona mediante WebSockets al servidor central.
+​Generación de HWID: Algoritmo local que recopila identificadores únicos del hardware del usuario (placa base, disco duro, procesador) para generar un hash seguro que actúa como identificación inalterable.
+​Integración con Anticheat: Módulo cliente que verifica la ejecución y respuesta activa del driver a nivel kernel antes de permitir el acceso a las funciones principales de la aplicación.
+​Arquitectura del Servidor (.NET Framework + SQLite)
+​Servidor WebSocket: Motor backend capaz de gestionar conexiones simultáneas en tiempo real, procesando paquetes JSON para autenticación, listados de servidores, telemetría y comandos administrativos.
+​Base de Datos SQLite (server.db):
+​Tabla de usuarios (credenciales, HWID, última IP y fecha de registro).
+​Tabla de baneos (registro de HWIDs bloqueados para impedir el acceso absoluto a la plataforma).
+​Tabla de registros/logs históricos.
+​Panel de Control Administrativo (Dashboard del Servidor):
+​Pestaña de Usuarios Conectados: Tabla en tiempo real que lista dinámicamente el Nombre, HWID, IP y Tiempo Conectado de cada cliente activo, con acciones directas de Kick (desconectar) y Ban (bloqueo permanente por HWID).
+​Pestaña de Logs: Consola de texto cronológica que registra de manera visual cada evento del sistema (conexiones entrantes, autenticaciones exitosas, intentos de bypass y bloqueos aplicados).
+​Anticheat a Nivel Kernel (Seguridad Ring 0)
+​Aislamiento de Procesos: Driver desarrollado en C/C++ cargado en el núcleo de Windows para utilizar devoluciones de llamada (callbacks) que impiden que programas externos (depuradores o inyectores de memoria) lean o escriban en la memoria de tu aplicación.
+​Mitigación de Amenazas: Bloqueo preventivo de técnicas de inyección de código y control de integridad contra drivers vulnerables conocidos (ataques BYOVD).
+​Comunicación Segura: Enlace protegido entre el driver en modo kernel, el cliente en C# y el servidor central para asegurar que la protección no pueda ser desactivada de forma arbitraria por el usuario.
+​Desarrollador: OxyMonster
